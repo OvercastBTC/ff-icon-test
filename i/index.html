@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FF-I</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FF-I">
+  <!-- ===== STRATEGY I: rel="icon" ONLY — NO apple-touch-icon, NO manifest ===== -->
+  <link rel="icon" type="image/png" sizes="180x180" href="../icons/I-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icons/I-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../icons/I-512.png">
+  <!-- ========================================================================= -->
+  <style>
+    :root{color-scheme:light dark} *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+      background:#303f9f;color:#fff;min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;text-align:center;padding:26px 18px calc(26px + env(safe-area-inset-bottom))}
+    .badge{font-size:118px;font-weight:800;line-height:1;margin:6px 0}
+    h1{font-size:25px;margin:4px 0}
+    .sub{font-size:16px;opacity:.95;max-width:540px;margin:0 auto 14px;font-weight:600}
+    .card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);
+      border-radius:16px;padding:16px;max-width:560px;width:100%;margin:10px auto}
+    .card h2{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:1px;opacity:.85}
+    code{display:block;background:rgba(0,0,0,.35);border-radius:10px;padding:12px;font-size:13px;
+      line-height:1.5;white-space:pre-wrap;word-break:break-all;text-align:left;
+      font-family:ui-monospace,Menlo,Consolas,monospace}
+    .preview img{width:96px;height:96px;border-radius:20px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+    ol{text-align:left;max-width:520px;margin:6px auto;font-size:15px;line-height:1.55}
+    .note{font-size:14px;opacity:.92;max-width:520px;margin:10px auto 2px}
+    a.back{color:#fff;font-weight:700;margin-top:16px;display:inline-block}
+  </style>
+</head>
+<body>
+  <div class="badge">I</div>
+  <h1>STRATEGY I — rel="icon" ONLY (no apple-touch-icon)</h1>
+  <div class="sub">Icon declared with the standard <code style="display:inline;padding:2px 6px">rel="icon"</code>
+    PNG links (with sizes) — and <b>no</b> <code style="display:inline;padding:2px 6px">apple-touch-icon</code>, <b>no</b> manifest.</div>
+
+  <div class="card">
+    <h2>Expected icon</h2>
+    <div class="preview"><img src="../icons/I-180.png" alt="indigo I"></div>
+    <div class="note">PASS = an <b>indigo tile with a white “I”</b>. FAIL = a letter
+      monogram (“F”), a white/compass fallback, or a screenshot.</div>
+  </div>
+
+  <div class="card">
+    <h2>Declaration under test</h2>
+    <code>&lt;link rel="icon" type="image/png" sizes="180x180" href="…/I-180.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="192x192" href="…/I-192.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="512x512" href="…/I-512.png"&gt;</code>
+    <div class="note">Does the browser honor a plain <b>rel="icon"</b> for the
+      Home-Screen tile when there is no apple-touch-icon at all?</div>
+  </div>
+
+  <div class="card">
+    <h2>Install test</h2>
+    <ol>
+      <li>Open this page (FF-I) in the browser you're testing.</li>
+      <li>Share → <b>Add to Home Screen</b> → Add.</li>
+      <li>Record PASS (indigo “I”) / FAIL per browser.</li>
+    </ol>
+  </div>
+  <a class="back" href="../index.html">← back to all strategies</a>
+</body>
+</html>
