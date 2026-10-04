@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FF-E</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FF-E">
+  <!-- ===== ICON STRATEGY E (the ONLY icon declaration on this page) ===== -->
+  <link rel="apple-touch-icon-precomposed" href="../icons/E-180.png">
+  <!-- ======================================================================= -->
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+      background:#7b1fa2; color:#fff; min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
+      padding:24px 18px calc(24px + env(safe-area-inset-bottom)); text-align:center; }
+    .badge { font-size:120px; font-weight:800; line-height:1; margin:8px 0 4px;
+      text-shadow:0 2px 12px rgba(0,0,0,.35); }
+    h1 { font-size:28px; margin:4px 0 2px; letter-spacing:.5px; }
+    .sub { font-size:16px; opacity:.95; max-width:520px; margin:0 auto 14px; font-weight:600; }
+    .card { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3);
+      border-radius:16px; padding:16px; max-width:560px; width:100%;
+      margin:10px auto; backdrop-filter:blur(4px); }
+    .card h2 { margin:0 0 8px; font-size:14px; text-transform:uppercase;
+      letter-spacing:1px; opacity:.85; }
+    code { display:block; background:rgba(0,0,0,.35); border-radius:10px; padding:12px;
+      font-size:13px; line-height:1.5; white-space:pre-wrap; word-break:break-all;
+      text-align:left; font-family:ui-monospace,Menlo,Consolas,monospace; }
+    .preview { display:flex; gap:14px; align-items:center; justify-content:center;
+      flex-wrap:wrap; }
+    .preview img { width:96px; height:96px; border-radius:20px;
+      box-shadow:0 4px 18px rgba(0,0,0,.4); background:
+      repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50%/16px 16px; }
+    .note { font-size:14px; opacity:.92; max-width:520px; margin:12px auto 4px; }
+    ol { text-align:left; max-width:520px; margin:6px auto; font-size:15px; line-height:1.55; }
+    a.back { color:#fff; font-weight:700; margin-top:18px; display:inline-block; }
+  </style>
+</head>
+<body>
+  <div class="badge">E</div>
+  <h1>STRATEGY E</h1>
+  <div class="sub">apple-touch-icon-PRECOMPOSED, 180×180, opaque</div>
+
+  <div class="card">
+    <h2>Expected home-screen icon</h2>
+    <div class="preview"><img src="../icons/E-180.png" alt="expected icon E"></div>
+    <div class="note">If the installed icon on your Home Screen matches this
+      (solid colour + big “E”), this strategy <b>PASSES</b>. If you see a letter
+      inside a white/grey box, a screenshot of this page, or a generic globe, it
+      <b>FAILS</b>.</div>
+  </div>
+
+  <div class="card">
+    <h2>The &lt;head&gt; declaration under test</h2>
+    <code>&lt;link rel="apple-touch-icon-precomposed" href="../icons/E-180.png"&gt;</code>
+    <div class="note">Older precomposed rel — some WebKit builds prefer it.</div>
+  </div>
+
+  <div class="card">
+    <h2>Install test (Firefox iOS)</h2>
+    <ol>
+      <li>You are on page <b>FF-E</b> in Firefox on your iPhone.</li>
+      <li>Tap the <b>hamburger / Share</b> menu → <b>Share…</b></li>
+      <li>Choose <b>Add to Home Screen</b>.</li>
+      <li>Confirm. Then look at the new Home Screen icon and compare to the preview above.</li>
+      <li>Record PASS / FAIL for strategy E.</li>
+    </ol>
+  </div>
+
+  <a class="back" href="../index.html">← back to all strategies</a>
+</body>
+</html>
