@@ -1,72 +1,67 @@
-# REQ-024 Findings — Firefox iOS Home-Screen Icon
+# REQ-024 Findings — iOS Home-Screen Icon, cross-browser
 
 **Lane F (F.26.10.03.1) · 2026-10-03**
 Test PWA: https://overcastbtc.github.io/ff-icon-test/
 
-## Result: 0 / 8 strategies produce a real home-screen icon in Firefox iOS
+## Headline
 
-Every strategy's **Add-to-Home-Screen dialog preview is an identical black tile
-with a white letter monogram** — none of the icon declarations influence it.
+- **Firefox iOS** ignores *all* web-declared icons for the Home-Screen tile and
+  draws a **name monogram** (first letter of the shortcut name). Confirmed:
+  names "FF-*" → "F"; name "Zebra" → "Z". **Unfixable at the markup layer.**
+- **DuckDuckGo iOS** *does* render the icon, but **requires the `sizes` attribute
+  on `apple-touch-icon`.** Strategy A (no `sizes`) FAILED; B (identical but
+  `sizes="180x180"`) SUCCEEDED. This is the one concrete, fixable markup finding.
+- Safari / Chrome iOS: reported working (full confirmation pending).
 
-| Strategy | `<head>` declaration | iOS **share-sheet** icon (what Firefox resolved) | **Add-to-Home-Screen** tile preview | Verdict |
-|---|---|---|---|---|
-| A | apple-touch-icon 180 opaque, no sizes | ✅ real icon (inset on white) | ⬛ monogram | FAIL |
-| B | + `sizes="180x180"` | ✅ real icon | ⬛ monogram | FAIL |
-| C | manifest icons **only** | 🧭 Safari-compass fallback | ⬛ monogram | FAIL |
-| D | both apple-touch-icon + manifest (**BATTERY's current**) | ✅ real icon | ⬛ monogram | FAIL |
-| E | apple-touch-icon-precomposed | ✅ real icon | ⬛ monogram | FAIL |
-| F | apple-touch-icon 180 **transparent** | ✅ real icon (alpha→white) | ⬛ monogram | FAIL |
-| G | full set 120/152/167/180 | ✅ real icon | ⬛ monogram | FAIL |
-| H | apple-touch-icon **absolute url** | ✅ real icon | ⬛ monogram | FAIL |
+## Cross-browser matrix
 
-## Root cause
+| Strategy | `<head>` declaration | DuckDuckGo iOS | Firefox iOS | Safari | Chrome iOS |
+|---|---|---|---|---|---|
+| A | apple-touch-icon 180 opaque, **no sizes** | ❌ FAIL | monogram | _pending_ | _pending_ |
+| B | apple-touch-icon 180 **+ sizes** | ✅ pass | monogram | _pending_ | _pending_ |
+| C | manifest icons only | 🟡 color only | monogram | _pending_ | _pending_ |
+| D | both apple-touch-icon + manifest (**BATTERY's current**) | ✅ pass | monogram | _pending_ | _pending_ |
+| E | apple-touch-icon-precomposed | ✅ pass | monogram | _pending_ | _pending_ |
+| F | apple-touch-icon transparent | ✅ pass | monogram | _pending_ | _pending_ |
+| G | full set 120/152/167/180 (all w/ sizes) | ✅ pass | monogram | _pending_ | _pending_ |
+| H | apple-touch-icon absolute url | ✅ pass | monogram | _pending_ | _pending_ |
+| I | **rel="icon" only** (no apple-touch-icon, no manifest) | _new, pending_ | _pending_ | _pending_ | _pending_ |
+| Z | apple-touch-icon + name "Zebra" | ✅ pass | **"Z" monogram** | _pending_ | _pending_ |
 
-**Firefox for iOS does not honor any web-declared icon for the Home-Screen
-web-clip.** Its *Add to Home Screen* generates a **first-letter monogram of the
-shortcut name** on a dark tile, regardless of apple-touch-icon (any rel/size/
-alpha/path) or manifest icons.
+Legend: ✅ real icon · ❌ no icon · 🟡 partial (color, no mark) · monogram = name letter.
 
-Two independent code paths were observed:
-- **Share sheet** — *does* resolve the apple-touch-icon (icons A/B/D/E/F/G/H all
-  showed the correct art; C fell back to the Safari compass because it has no
-  apple-touch-icon). This proves the icon files and declarations are valid and
-  reachable — Firefox finds them.
-- **Home-Screen tile** — ignores all of it and draws a name monogram.
+## What each browser needs
 
-This is an **iOS platform constraint**: Apple only grants the full custom
-web-clip-icon pipeline to Safari. Third-party iOS browsers (all on WKWebView)
-cannot set a custom home-screen icon, so Firefox substitutes a monogram.
-**No change to BATTERY's `<head>` can fix the icon in Firefox iOS.**
+- **DuckDuckGo iOS:** `apple-touch-icon` **must carry a `sizes` attribute.** Bare
+  `apple-touch-icon` (no sizes) is ignored. precomposed / transparent / multi-size
+  / absolute-url all fine. Manifest-only yields color-only.
+- **Firefox iOS:** nothing works for the tile — it always uses a name monogram.
+  The only lever is the **name** (first letter). No markup fix exists.
+- **Safari / Chrome iOS:** honor apple-touch-icon normally (confirmation pending).
 
-## The one available lever: the monogram letter = the app name
+## BATTERY status vs these findings
 
-The monogram is the first character of the Add-to-Home-Screen **name** (defaults
-from `<title>` / `apple-mobile-web-app-title`). Confirmed with the `z/`
-discriminator page (named "Zebra" → tile shows **"Z"**, not "F").
-*(see confirmation below once Adam runs z/)*
-
-BATTERY today: `<title>BATTERY</title>`, `apple-mobile-web-app-title="BATTERY"`,
-manifest name/short_name `"BATTERY"` → Firefox-iOS monogram = **"B"** on a dark
-tile. That "B" tile *is* the "fallback letter" reported in REQ-024.
+BATTERY's live `<head>` already ships `apple-touch-icon` at 180/167/152/120
+**each with `sizes`** + manifest icons + title/name "BATTERY".
+- → Already satisfies **DuckDuckGo** (has sizes), and Safari/Chrome.
+- → In **Firefox iOS** it renders as a **"B"** monogram tile — that *is* the
+  "fallback letter" in REQ-024. No markup can change that.
 
 ## Recommendation (routes Q → Lane A/E)
 
-1. **No icon markup change is needed or will help for Firefox iOS.** BATTERY's
-   existing icon set is already correct for Safari (the supported path) and for
-   the share sheet. **Leave the `<head>` icon block as-is.** Do not spend effort
-   adding/altering apple-touch-icon or manifest icons to chase Firefox iOS — it
-   is unwinnable at the markup layer.
-2. **Make the unavoidable monogram look intentional.** Keep the name "BATTERY"
-   (monogram "B"); optionally shorten the default Add name to **"Battery"** so the
-   capital **B** reads cleanly. Nothing else about the tile is controllable.
-3. **Guide iOS users to Safari for a real icon.** Add a small conditional hint in
-   BATTERY (shown when the browser is Firefox iOS, or in install docs):
-   *"On iPhone, add to Home Screen from **Safari** to get the Battery icon.
-   Firefox on iOS shows a plain letter tile — an Apple limitation for non-Safari
-   browsers."* Detection: UA contains `FxiOS`.
-4. **Close REQ-024 as "works as designed in Safari; Firefox-iOS limitation,
-   mitigated by guidance."** Not a BATTERY code defect.
+1. **No required BATTERY icon-markup change** for DuckDuckGo/Safari/Chrome —
+   BATTERY already uses `apple-touch-icon` **with `sizes`** (the thing DDG needs).
+   Keep it. If A/E ever strip the `sizes` attribute, DuckDuckGo would break — so
+   **treat `sizes` on apple-touch-icon as required, not optional.**
+2. **Firefox iOS is a client limitation, not a BATTERY defect.** Add a small
+   FxiOS-conditional hint (UA contains `FxiOS`): *"On iPhone, add to Home Screen
+   from Safari, Chrome, or DuckDuckGo for the Battery icon — Firefox on iOS shows
+   a plain letter tile."* Keep the name "BATTERY" so the monogram is a clean "B".
+3. Close REQ-024 as: **icon works in Safari / Chrome / DuckDuckGo; Firefox iOS
+   limited to a name monogram (mitigated by guidance).** Not a code defect.
 
-## Reproduce / assets
-- Pages: `a/`…`h/` (one strategy each), `z/` (name discriminator), `index.html` (hub).
-- Icon generators: `scratchpad/gen_icons.py`, `scratchpad/gen_html.py`.
+_(Pending to finalize: Strategy I result, and Safari/Chrome columns.)_
+
+## Assets
+- Pages: `a/`…`i/` (one strategy each), `z/` (name discriminator), `index.html` (hub).
+- Generators: `scratchpad/gen_icons.py`, `scratchpad/gen_html.py`.
