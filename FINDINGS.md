@@ -62,6 +62,21 @@ BATTERY's live `<head>` already ships `apple-touch-icon` at 180/167/152/120
 
 _(Pending to finalize: Strategy I result, and Safari/Chrome columns.)_
 
+## ✅ FINAL VERDICT (confirmed on-device, BAT-DIAG = apple-touch-icon + rel=icon)
+
+| Browser (iOS) | Installed Home-Screen tile | Launch mode |
+|---|---|---|
+| **Safari** | ✅ real icon (battery art) | standalone web-clip (`navigator.standalone:true`) |
+| **DuckDuckGo** | ✅ real icon (battery art) | standalone web-clip |
+| **Chrome iOS** | ✅ expected (same WebKit/apple-touch-icon path; not re-tested this round) | standalone web-clip |
+| **Firefox** | ❌ "B" name-monogram — **even when set as the default browser** | with FF default it DOES create a real web-clip (`installed:true`) but still supplies a monogram, not the icon |
+
+**`apple-touch-icon` (with `sizes`) is the lever.** rel="icon"-only and data-URI icons do NOT
+produce an installed tile (monogram even in Safari). Firefox ignores the icon for the
+web-clip in every configuration tested (bookmark when not default; real web-clip when
+default — monogram either way). BATTERY already ships apple-touch-icon with sizes, so its
+icon already works everywhere except Firefox.
+
 ## DECISIVE: `apple-touch-icon` is MANDATORY (rel="icon" alone = monogram, even in Safari)
 
 BAT-DIAG (rel="icon"-ONLY, real battery art, no apple-touch-icon) was installed via
