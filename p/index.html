@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FF-P</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FF-P">
+  <!-- ===== STRATEGY P ===== -->
+  <link rel="icon" type="image/svg+xml" href="../icons/P.svg">
+  <!-- ============================= -->
+  <style>
+    :root{color-scheme: light dark} *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+      background:#2e7d32;color:#fff;min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;text-align:center;padding:26px 18px calc(26px + env(safe-area-inset-bottom))}
+    .badge{font-size:116px;font-weight:800;line-height:1;margin:6px 0}
+    h1{font-size:23px;margin:4px 0} .sub{font-size:15px;opacity:.95;max-width:560px;margin:0 auto 14px;font-weight:600}
+    .card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:16px;padding:14px;max-width:580px;width:100%;margin:9px auto}
+    .card h2{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:1px;opacity:.85}
+    code{display:block;background:rgba(0,0,0,.4);border-radius:10px;padding:11px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;text-align:left;font-family:ui-monospace,Menlo,Consolas,monospace}
+    .preview img{width:92px;height:92px;border-radius:20px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+    ol{text-align:left;max-width:540px;margin:6px auto;font-size:15px;line-height:1.5}
+    .note{font-size:13px;opacity:.92;max-width:540px;margin:9px auto 2px}
+    a.back{color:#fff;font-weight:700;margin-top:14px;display:inline-block}
+  </style>
+</head><body>
+  <div class="badge">P</div>
+  <h1>STRATEGY P - rel="icon" SVG (vector) only</h1>
+  <div class="sub">A single scalable SVG via rel="icon" - no PNGs, no apple-touch-icon, no manifest. Crispest full-bleed candidate, and closest to BATTERY's existing inline SVG favicon (but as a FILE, since data: URIs render nothing in FF iOS).</div>
+  <div class="card"><h2>Expected icon</h2>
+    <div class="preview"><img src="../icons/P.svg" alt="P"></div>
+    <div class="note">PASS = full-bleed green P. Does FF iOS honor an SVG rel=icon for the share sheet?</div></div>
+  <div class="card"><h2>Declaration under test (ORDER MATTERS)</h2><code>&lt;link rel="icon" type="image/svg+xml" href="../icons/P.svg"&gt;</code></div>
+  <div class="card"><h2>Install test</h2><ol>
+    <li>Open FF-P in the browser you are testing.</li>
+    <li>Share -> look at the share-sheet icon (full-bleed vs white-space?).</li>
+    <li>Add to Home Screen -> look at the INSTALLED tile.</li>
+    <li>Report both, per browser.</li></ol></div>
+  <a class="back" href="../index.html">&larr; back to all strategies</a>
+</body></html>
