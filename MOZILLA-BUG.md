@@ -1,7 +1,11 @@
-# Draft bug report — Firefox for iOS
+# Bug report — Firefox for iOS
 
-**Status: DRAFT (not submitted).** File at https://connect.mozilla.org or
-Bugzilla (Product: Firefox for iOS) after review.
+**Status: ✅ SUBMITTED 2026-10-04** by OvercastBTC →
+**https://github.com/mozilla-mobile/firefox-ios/issues/35900**
+(filed on the mozilla-mobile/firefox-ios GitHub tracker; no exact duplicate found —
+related issues #14095/#17116 are about the feature existing, not the wrong icon.)
+
+The text below is what was filed (template-formatted version lives in the issue).
 
 ---
 
