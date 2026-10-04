@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FF-V</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FF-V">
+  <!-- ===== STRATEGY V ===== -->
+  <link rel="icon" type="image/png" sizes="96x96" href="../icons/V-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icons/V-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../icons/V-512.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="../icons/V-152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="../icons/V-167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/V-180.png">
+  <!-- ============================= -->
+  <style>
+    :root{color-scheme: light dark} *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+      background:#1565c0;color:#fff;min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;text-align:center;padding:26px 18px calc(26px + env(safe-area-inset-bottom))}
+    .badge{font-size:116px;font-weight:800;line-height:1;margin:6px 0}
+    h1{font-size:23px;margin:4px 0} .sub{font-size:15px;opacity:.95;max-width:560px;margin:0 auto 14px;font-weight:600}
+    .card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:16px;padding:14px;max-width:580px;width:100%;margin:9px auto}
+    .card h2{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:1px;opacity:.85}
+    code{display:block;background:rgba(0,0,0,.4);border-radius:10px;padding:11px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;text-align:left;font-family:ui-monospace,Menlo,Consolas,monospace}
+    .preview img{width:92px;height:92px;border-radius:20px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+    ol{text-align:left;max-width:540px;margin:6px auto;font-size:15px;line-height:1.5}
+    .note{font-size:13px;opacity:.92;max-width:540px;margin:9px auto 2px}
+    a.back{color:#fff;font-weight:700;margin-top:14px;display:inline-block}
+  </style>
+</head><body>
+  <div class="badge">V</div>
+  <h1>STRATEGY V - MAX VOLUME (every size, icon then apple-touch-icon)</h1>
+  <div class="sub">The "throw everything" test: three rel=icon sizes (96/192/512) THEN three apple-touch-icon sizes (152/167/180). Does piling on more declarations help any browser pick a full-glyph tile?</div>
+  <div class="card"><h2>Expected icon</h2>
+    <div class="preview"><img src="../icons/V-180.png" alt="V"></div>
+    <div class="note">Report full glyph vs color-only vs monogram, per browser.</div></div>
+  <div class="card"><h2>Declaration under test</h2><code>&lt;link rel="icon" type="image/png" sizes="96x96" href="../icons/V-96.png"&gt;
+  &lt;link rel="icon" type="image/png" sizes="192x192" href="../icons/V-192.png"&gt;
+  &lt;link rel="icon" type="image/png" sizes="512x512" href="../icons/V-512.png"&gt;
+  &lt;link rel="apple-touch-icon" sizes="152x152" href="../icons/V-152.png"&gt;
+  &lt;link rel="apple-touch-icon" sizes="167x167" href="../icons/V-167.png"&gt;
+  &lt;link rel="apple-touch-icon" sizes="180x180" href="../icons/V-180.png"&gt;</code></div>
+  <div class="card"><h2>Install test</h2><ol>
+    <li>Open FF-V in the browser you are testing (esp. DuckDuckGo / Safari / Chrome, which install real tiles).</li>
+    <li>Share -> note the share icon; Add to Home Screen -> note the INSTALLED tile.</li>
+    <li>Report: full glyph / color-only / monogram, per browser.</li></ol></div>
+  <a class="back" href="../index.html">&larr; back to all strategies</a>
+</body></html>
