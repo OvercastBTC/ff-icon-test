@@ -62,6 +62,27 @@ BATTERY's live `<head>` already ships `apple-touch-icon` at 180/167/152/120
 
 _(Pending to finalize: Strategy I result, and Safari/Chrome columns.)_
 
+## DECISIVE: `apple-touch-icon` is MANDATORY (rel="icon" alone = monogram, even in Safari)
+
+BAT-DIAG (rel="icon"-ONLY, real battery art, no apple-touch-icon) was installed via
+**both Firefox and Safari** → **both produced a black "B" letter monogram**, not the
+icon. So **Safari does NOT honor `rel="icon"` for the Home-Screen web-clip** — it
+falls back to a name monogram exactly like Firefox when `apple-touch-icon` is absent.
+The full-bleed `rel="icon"` render seen earlier was the **Firefox share-sheet preview
+only** and never becomes an installed tile anywhere. **Conclusion: `apple-touch-icon`
+(with `sizes`) is required for a real installed icon in Safari / Chrome iOS /
+DuckDuckGo. The "I method" is not viable for installed icons.**
+
+BATTERY already ships `apple-touch-icon` 120/152/167/180 with `sizes`, so **BATTERY's
+installed icon already works in Safari / Chrome / DuckDuckGo** — REQ-024 reproduces
+only in Firefox iOS (which makes a bookmark, not a web-clip).
+
+Launch-mode note (BAT-DIAG): Firefox Home-Screen shortcut launches `installed:false`
+(opens in-browser = bookmark); Safari launches `navigator.standalone:true` (real
+web-clip). On iOS `matchMedia('(display-mode: standalone)')` returns `browser` even
+when installed — use `navigator.standalone`. **Flag for A/E: if BATTERY gates
+standalone behavior on display-mode, it mis-detects on iOS.**
+
 ## FINAL recommended BATTERY `<head>` icon block (for Lane A/E)
 
 BATTERY's **manifest already** declares icon-192 (any), icon-512 (any) and icon-512
