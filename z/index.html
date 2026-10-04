@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Zebra</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Zebra">
+  <!-- Opaque apple-touch-icon present (a WHITE "Z" on a dark tile), AND the app
+       name is "Zebra" (starts with Z, not F). If the installed/preview tile shows
+       a "Z", the monogram follows the NAME (actionable lever). If it shows "F" or
+       "Z"-the-icon, we learn which path Firefox iOS uses. -->
+  <link rel="apple-touch-icon" href="../icons/Z-180.png">
+  <style>
+    :root{color-scheme:light dark} *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+      background:#111;color:#fff;min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;text-align:center;padding:28px 18px}
+    .badge{font-size:120px;font-weight:800;margin:6px 0}
+    h1{font-size:26px;margin:4px 0}
+    .sub{font-size:16px;opacity:.9;max-width:520px;margin:0 auto 16px;font-weight:600}
+    .card{background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:16px;
+      max-width:540px;width:100%;margin:10px auto}
+    ol{text-align:left;margin:6px auto;font-size:15px;line-height:1.6}
+    a{color:#6cf;font-weight:700;display:inline-block;margin-top:16px}
+  </style>
+</head>
+<body>
+  <div class="badge">Z</div>
+  <h1>DISCRIMINATOR — app name "Zebra"</h1>
+  <div class="sub">This page has an apple-touch-icon (a white “Z” tile) and is named
+    <b>Zebra</b>. We want to know what letter the Firefox-iOS tile shows.</div>
+  <div class="card">
+    <ol>
+      <li>In Firefox iOS: Share → <b>Add to Home Screen</b>.</li>
+      <li><b>Leave the name as "Zebra"</b> and tap Add.</li>
+      <li>Report the tile letter: a <b>“Z”</b> → monogram follows the NAME (lever confirmed).
+        An <b>“F”</b> → Firefox uses a fixed placeholder (no name lever).</li>
+    </ol>
+  </div>
+  <a href="../index.html">← back</a>
+</body>
+</html>
