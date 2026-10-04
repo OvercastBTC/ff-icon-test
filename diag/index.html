@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BAT-DIAG</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="BAT-DIAG">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d1117">
+  <!-- This diagnostic page itself uses the "I method" (rel=icon only) with the real
+       BATTERY art, so installing + opening it reveals how it's launched. -->
+  <link rel="icon" type="image/png" sizes="180x180" href="../icons/battery/icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icons/battery/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../icons/battery/icon-512.png">
+  <style>
+    :root{color-scheme:light dark} *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+      background:#0d1117;color:#e6edf3;padding:18px 14px calc(26px + env(safe-area-inset-bottom))}
+    .wrap{max-width:720px;margin:0 auto}
+    h1{font-size:20px;margin:0 0 2px} .tag{color:#58a6ff;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+    p.lead{color:#9aa4b2;font-size:13px;margin:6px 0 14px}
+    .bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;position:sticky;top:0;background:#0d1117;padding:8px 0;z-index:5}
+    button{appearance:none;border:1px solid #30363d;background:#21262d;color:#e6edf3;font-weight:700;
+      font-size:14px;padding:10px 14px;border-radius:10px;flex:1 1 auto;min-width:120px}
+    button.primary{background:#238636;border-color:#2ea043}
+    button:active{transform:scale(.98)}
+    section{background:#161b22;border:1px solid #30363d;border-radius:12px;margin:10px 0;overflow:hidden}
+    section>h2{margin:0;padding:12px 14px;font-size:13px;text-transform:uppercase;letter-spacing:1px;
+      color:#9aa4b2;background:#11161d;border-bottom:1px solid #30363d}
+    .kv{padding:6px 14px;font-size:13px;display:flex;gap:10px;border-bottom:1px solid #1c2129}
+    .kv:last-child{border-bottom:0}
+    .kv .k{color:#9aa4b2;flex:0 0 40%;word-break:break-word}
+    .kv .v{flex:1;word-break:break-word;font-family:ui-monospace,Menlo,Consolas,monospace}
+    .v.good{color:#3fb950} .v.bad{color:#f85149} .v.warn{color:#d29922}
+    .icon-item{display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid #1c2129}
+    .icon-item img{width:48px;height:48px;border-radius:10px;background:
+      repeating-conic-gradient(#333 0% 25%,#222 0% 50%) 50%/12px 12px;flex:0 0 auto;object-fit:contain}
+    .icon-item .meta{font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+    pre{margin:0;padding:12px 14px;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-all;
+      font-family:ui-monospace,Menlo,Consolas,monospace;color:#c9d1d9;max-height:280px;overflow:auto}
+    .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:700}
+    .badge.on{background:#1f6f34;color:#d6ffd9}.badge.off{background:#5a1e1e;color:#ffd6d6}
+    a{color:#58a6ff}
+    #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#238636;color:#fff;
+      padding:10px 16px;border-radius:10px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none}
+    #toast.show{opacity:1}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="tag">REQ-024 · Lane F</div>
+    <h1>BAT-DIAG — iOS icon/web-app inspector</h1>
+    <p class="lead">An on-device "F12" for the home-screen icon problem. Install this page,
+      open it from the Home Screen, then tap <b>Copy report</b> and paste it back to Claude.</p>
+
+    <div class="bar">
+      <button class="primary" onclick="copyReport()">📋 Copy report</button>
+      <button onclick="location.reload()">↻ Reload</button>
+      <button onclick="clearLog()">🗑 Clear launch log</button>
+    </div>
+
+    <section id="sec-launch"><h2>Launch &amp; environment</h2></section>
+    <section id="sec-browser"><h2>Browser</h2></section>
+    <section id="sec-display"><h2>Display / viewport</h2></section>
+    <section id="sec-meta"><h2>Apple / meta tags</h2></section>
+    <section id="sec-icons"><h2>Declared icons (&lt;link&gt;) — resolved &amp; load-tested</h2></section>
+    <section id="sec-manifest"><h2>Web App Manifest</h2></section>
+    <section id="sec-log"><h2>Launch log (persisted)</h2></section>
+    <section id="sec-raw"><h2>Raw report (copyable)</h2><pre id="raw"></pre></section>
+  </div>
+  <div id="toast">Copied!</div>
+
+<script>
+(function(){
+  var R = {}; // report object
+  function el(tag, cls, txt){ var e=document.createElement(tag); if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e; }
+  function kv(sec, k, v, cls){
+    var row=el('div','kv'); row.appendChild(el('span','k',k));
+    var val=el('span','v'+(cls?' '+cls:''), (v==null?'—':String(v))); row.appendChild(val);
+    document.getElementById(sec).appendChild(row);
+  }
+  function now(){ return new Date().toISOString(); }
+
+  // ---- Browser detection ----
+  var ua = navigator.userAgent;
+  function detectBrowser(){
+    if(/FxiOS/.test(ua)) return 'Firefox iOS';
+    if(/CriOS/.test(ua)) return 'Chrome iOS';
+    if(/EdgiOS/.test(ua)) return 'Edge iOS';
+    if(/DuckDuckGo/i.test(ua) || /Ddg/i.test(ua)) return 'DuckDuckGo iOS';
+    if(/OPiOS|OPT\//.test(ua)) return 'Opera iOS';
+    if(/Brave/i.test(ua)) return 'Brave';
+    if(/Safari/.test(ua) && /Version\//.test(ua)) return 'Safari';
+    return 'Unknown / WebView';
+  }
+  R.browser = detectBrowser();
+
+  // ---- Display mode / installed detection ----
+  function dm(mode){ try{ return window.matchMedia('(display-mode: '+mode+')').matches; }catch(e){ return false; } }
+  var standaloneNav = (('standalone' in navigator) ? navigator.standalone : undefined); // iOS Safari/WebView flag
+  var modes = ['standalone','fullscreen','minimal-ui','browser'].filter(dm);
+  var installed = (standaloneNav===true) || dm('standalone') || dm('fullscreen');
+  R.installed = installed; R.displayModes = modes; R.navigatorStandalone = standaloneNav;
+
+  // ---- Launch & environment ----
+  kv('sec-launch','Time', now());
+  kv('sec-launch','Running as installed app?', installed?'YES — launched from Home Screen':'no — in browser tab', installed?'good':'warn');
+  kv('sec-launch','display-mode matches', modes.length?modes.join(', '):'(none)');
+  kv('sec-launch','navigator.standalone', standaloneNav===undefined?'undefined (not iOS WKWebView webclip)':standaloneNav, standaloneNav?'good':'');
+  try{ kv('sec-launch','Launch type', (performance.getEntriesByType('navigation')[0]||{}).type || '—'); }catch(e){}
+  kv('sec-launch','Referrer', document.referrer||'(none)');
+  kv('sec-launch','URL', location.href);
+
+  // ---- Browser ----
+  kv('sec-browser','Detected', R.browser, 'good');
+  kv('sec-browser','User-Agent', ua);
+  kv('sec-browser','Platform', navigator.platform);
+  kv('sec-browser','Vendor', navigator.vendor||'—');
+  kv('sec-browser','Languages', (navigator.languages||[navigator.language]).join(', '));
+  kv('sec-browser','maxTouchPoints', navigator.maxTouchPoints);
+
+  // ---- Display ----
+  kv('sec-display','window inner', innerWidth+' × '+innerHeight);
+  kv('sec-display','screen', screen.width+' × '+screen.height);
+  kv('sec-display','devicePixelRatio', window.devicePixelRatio);
+  try{ kv('sec-display','orientation', (screen.orientation||{}).type||'—'); }catch(e){}
+  kv('sec-display','prefers-color-scheme', window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  R.viewport = {inner:[innerWidth,innerHeight], screen:[screen.width,screen.height], dpr:window.devicePixelRatio};
+
+  // ---- Meta tags ----
+  function meta(name){ var m=document.querySelector('meta[name="'+name+'"]'); return m?m.content:null; }
+  var metas = {
+    'apple-mobile-web-app-capable': meta('apple-mobile-web-app-capable'),
+    'apple-mobile-web-app-title': meta('apple-mobile-web-app-title'),
+    'apple-mobile-web-app-status-bar-style': meta('apple-mobile-web-app-status-bar-style'),
+    'theme-color': meta('theme-color'),
+    'viewport': meta('viewport')
+  };
+  R.meta = metas;
+  Object.keys(metas).forEach(function(k){ kv('sec-meta', k, metas[k]); });
+  kv('sec-meta','<title>', document.title);
+
+  // ---- Declared icons ----
+  R.icons = [];
+  var links = Array.prototype.slice.call(document.querySelectorAll('link[rel]'))
+    .filter(function(l){ return /icon|apple-touch|manifest|mask/i.test(l.getAttribute('rel')); });
+  var iconSec = document.getElementById('sec-icons');
+  if(!links.length) iconSec.appendChild(el('div','kv','(no icon-related <link> tags found)'));
+  links.forEach(function(l){
+    var rel=l.getAttribute('rel'), type=l.getAttribute('type')||'', sizes=l.getAttribute('sizes')||'', href=l.href;
+    var rec={rel:rel,type:type,sizes:sizes,href:href,loaded:null,natural:null};
+    R.icons.push(rec);
+    var item=el('div','icon-item');
+    var img=el('img'); item.appendChild(img);
+    var meta=el('div','meta');
+    var hrefShort = href.length>70 ? href.slice(0,40)+'…'+href.slice(-20) : href;
+    meta.innerHTML = '<b>rel="'+rel+'"</b>'+(type?' type="'+type+'"':'')+(sizes?' sizes="'+sizes+'"':'')+'<br>'+hrefShort;
+    item.appendChild(meta);
+    iconSec.appendChild(item);
+    if(/manifest/i.test(rel)){ img.alt='(manifest)'; meta.innerHTML+='<br><i>(manifest — parsed below)</i>'; return; }
+    // load-test the icon
+    var probe=new Image();
+    probe.onload=function(){ rec.loaded=true; rec.natural=probe.naturalWidth+'×'+probe.naturalHeight;
+      img.src=href; var b=el('span'); b.innerHTML=' ✓ '+rec.natural; b.style.color='#3fb950'; meta.appendChild(b); updateRaw(); };
+    probe.onerror=function(){ rec.loaded=false; var b=el('span'); b.textContent=' ✗ failed to load'; b.style.color='#f85149'; meta.appendChild(b); updateRaw(); };
+    probe.src=href;
+  });
+
+  // ---- Manifest ----
+  R.manifest = null;
+  var manLink = document.querySelector('link[rel="manifest"]');
+  var manSec = document.getElementById('sec-manifest');
+  if(!manLink){ manSec.appendChild(el('div','kv','(no <link rel="manifest">)')); }
+  else {
+    kv('sec-manifest','href', manLink.href);
+    fetch(manLink.href).then(function(r){ return r.json(); }).then(function(j){
+      R.manifest = j;
+      var pre=el('pre'); pre.textContent=JSON.stringify(j,null,2); manSec.appendChild(pre);
+      (j.icons||[]).forEach(function(ic){
+        var item=el('div','icon-item'); var img=el('img'); item.appendChild(img);
+        var m=el('div','meta'); m.innerHTML='manifest icon · sizes="'+(ic.sizes||'')+'" type="'+(ic.type||'')+'" purpose="'+(ic.purpose||'')+'"<br>'+ic.src;
+        item.appendChild(m); manSec.appendChild(item);
+        var abs=new URL(ic.src, manLink.href).href;
+        var probe=new Image();
+        probe.onload=function(){ img.src=abs; var b=el('span'); b.innerHTML=' ✓ '+probe.naturalWidth+'×'+probe.naturalHeight; b.style.color='#3fb950'; m.appendChild(b); };
+        probe.onerror=function(){ var b=el('span'); b.textContent=' ✗ failed'; b.style.color='#f85149'; m.appendChild(b); };
+        probe.src=abs;
+      });
+      updateRaw();
+    }).catch(function(e){ manSec.appendChild(el('div','kv','manifest fetch/parse error: '+e)); });
+  }
+
+  // ---- Persisted launch log ----
+  var LOGKEY='batdiag_log';
+  function getLog(){ try{ return JSON.parse(localStorage.getItem(LOGKEY)||'[]'); }catch(e){ return []; } }
+  function pushLog(){ try{ var l=getLog(); l.push({t:now(),browser:R.browser,installed:installed,modes:modes.join('|'),std:standaloneNav});
+    localStorage.setItem(LOGKEY, JSON.stringify(l.slice(-30))); }catch(e){} }
+  function renderLog(){ var sec=document.getElementById('sec-log'); sec.querySelectorAll('.kv,.logpre').forEach(function(n){n.remove();});
+    var l=getLog(); if(!l.length){ sec.appendChild(el('div','kv','(empty)')); return; }
+    var pre=el('pre','logpre'); pre.textContent=l.map(function(e){return e.t+'  '+e.browser+'  '+(e.installed?'INSTALLED':'tab')+'  ['+e.modes+']';}).join('\n'); sec.appendChild(pre);
+  }
+  window.clearLog=function(){ try{ localStorage.removeItem(LOGKEY); }catch(e){} renderLog(); };
+  pushLog(); renderLog();
+  R.launchLog = getLog();
+
+  // ---- Raw report + copy ----
+  function updateRaw(){ document.getElementById('raw').textContent = JSON.stringify(R, null, 2); }
+  updateRaw();
+  window.copyReport=function(){
+    var txt = document.getElementById('raw').textContent;
+    function toast(){ var t=document.getElementById('toast'); t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},1400); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(toast, function(){ fallback(txt); });
+    } else fallback(txt);
+    function fallback(t){ var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); toast(); }catch(e){ alert('Select the Raw report text and copy manually.'); } ta.remove(); }
+  };
+  // keep raw updated as async probes resolve
+  setTimeout(updateRaw, 1500); setTimeout(updateRaw, 3500);
+})();
+</script>
+</body>
+</html>
