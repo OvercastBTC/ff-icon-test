@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SAFE-AREA</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SAFE-AREA">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/battery/icon-180.png">
+  <link rel="icon" type="image/png" sizes="180x180" href="../icons/battery/icon-180.png">
+  <style>
+    :root{color-scheme:light dark} *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+      background:#0d1117;color:#e6edf3;padding:16px 14px 0}
+    .wrap{max-width:720px;margin:0 auto;padding-bottom:120px}
+    h1{font-size:19px;margin:0 0 2px}.tag{color:#58a6ff;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+    p.lead{color:#9aa4b2;font-size:13px;margin:6px 0 12px}
+    button{appearance:none;border:1px solid #30363d;background:#238636;color:#fff;font-weight:700;font-size:14px;padding:10px 14px;border-radius:10px;width:100%;margin:4px 0 12px}
+    section{background:#161b22;border:1px solid #30363d;border-radius:12px;margin:10px 0;overflow:hidden}
+    section>h2{margin:0;padding:11px 14px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#9aa4b2;background:#11161d;border-bottom:1px solid #30363d}
+    .kv{padding:6px 14px;font-size:13px;display:flex;gap:10px;border-bottom:1px solid #1c2129}
+    .kv:last-child{border-bottom:0}.kv .k{color:#9aa4b2;flex:0 0 52%}.kv .v{flex:1;font-family:ui-monospace,Menlo,Consolas,monospace}
+    .v.good{color:#3fb950}.v.bad{color:#f85149}.v.warn{color:#d29922}
+    pre{margin:0;padding:12px 14px;font-size:11px;white-space:pre-wrap;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace;color:#c9d1d9}
+    iframe{width:100%;height:120px;border:1px dashed #30363d;border-radius:10px;background:#0a0d12}
+    /* probe element: its computed padding = the env() value */
+    #probe{position:absolute;left:-9999px;padding-top:env(safe-area-inset-top);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left)}
+    /* a real fixed bottom bar like BATTERY's #tabbar (bottom:0, NO safe-area pad) */
+    #testbar{position:fixed;bottom:0;left:0;right:0;height:50px;background:#1f6f34;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;z-index:50}
+    #toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);background:#238636;color:#fff;padding:9px 16px;border-radius:10px;font-weight:700;opacity:0;transition:.2s;pointer-events:none}
+    #toast.show{opacity:1}
+  </style>
+</head>
+<body>
+  <div id="probe"></div>
+  <div class="wrap">
+    <div class="tag">REQ-024 follow-up · Lane F</div>
+    <h1>SAFE-AREA / bottom-nav inspector</h1>
+    <p class="lead">Measures the safe-area insets in the <b>top document</b> vs <b>inside an
+      iframe</b> (the BATTERY stage case), and whether a plain <code>bottom:0</code> bar
+      (like <code>#tabbar</code>) overlaps the home indicator. Run in Firefox / Safari /
+      DuckDuckGo, both in-browser and installed, then tap Copy.</p>
+    <button onclick="copyReport()">📋 Copy report</button>
+
+    <section id="sec-env"><h2>env(safe-area-inset-*) — TOP document</h2></section>
+    <section id="sec-iframe"><h2>env(safe-area-inset-bottom) — INSIDE an iframe</h2>
+      <div class="kv"><span class="k">iframe reports bottom</span><span class="v" id="iframeval">measuring…</span></div>
+      <iframe id="probeframe"></iframe>
+    </section>
+    <section id="sec-vp"><h2>Viewport / browser chrome</h2></section>
+    <section id="sec-bar"><h2>Fixed bottom:0 bar vs safe area</h2></section>
+    <section id="sec-env2"><h2>Launch</h2></section>
+    <section><h2>Raw</h2><pre id="raw"></pre></section>
+  </div>
+  <div id="testbar">#tabbar-style bar (bottom:0, no safe pad)</div>
+  <div id="toast">Copied!</div>
+
+<script>
+(function(){
+  var R={};
+  function kv(sec,k,v,cls){var r=document.createElement('div');r.className='kv';
+    var a=document.createElement('span');a.className='k';a.textContent=k;
+    var b=document.createElement('span');b.className='v'+(cls?' '+cls:'');b.textContent=(v==null?'—':String(v));
+    r.appendChild(a);r.appendChild(b);document.getElementById(sec).appendChild(r);}
+  function px(el,prop){return getComputedStyle(el)[prop];}
+
+  // browser / installed
+  var ua=navigator.userAgent;
+  function det(){if(/FxiOS/.test(ua))return'Firefox iOS';if(/CriOS/.test(ua))return'Chrome iOS';
+    if(/EdgiOS/.test(ua))return'Edge iOS';if(/DuckDuckGo|Ddg/i.test(ua))return'DuckDuckGo iOS';
+    if(/Safari/.test(ua)&&/Version\//.test(ua))return'Safari';return'WebView/Unknown';}
+  var std=('standalone'in navigator)?navigator.standalone:undefined;
+  var installed=(std===true)||(matchMedia('(display-mode: standalone)').matches);
+  R.browser=det();R.installed=installed;R.navigatorStandalone=std;
+
+  // TOP env insets
+  var probe=document.getElementById('probe');
+  var ins={top:px(probe,'paddingTop'),right:px(probe,'paddingRight'),bottom:px(probe,'paddingBottom'),left:px(probe,'paddingLeft')};
+  R.insetsTop=ins;
+  kv('sec-env','top',ins.top);kv('sec-env','right',ins.right);
+  kv('sec-env','bottom',ins.bottom, parseFloat(ins.bottom)>0?'good':'warn');
+  kv('sec-env','left',ins.left);
+
+  // iframe env(bottom) via srcdoc + postMessage
+  var ifr=document.getElementById('probeframe');
+  ifr.srcdoc='<!doctype html><meta name="viewport" content="viewport-fit=cover">'+
+    '<body style="margin:0;background:#0a0d12;color:#7ee;font:12px -apple-system">'+
+    '<div id="p" style="padding-bottom:env(safe-area-inset-bottom)"></div>'+
+    '<div id="o" style="padding:6px">iframe env(bottom)=<b id="b">?</b></div>'+
+    '<script>var v=getComputedStyle(document.getElementById("p")).paddingBottom;'+
+    'document.getElementById("b").textContent=v;'+
+    'parent.postMessage({ifbottom:v},"*");<\/script>';
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.ifbottom!=null){
+      R.iframeInsetBottom=e.data.ifbottom;
+      var same=parseFloat(e.data.ifbottom)>0;
+      document.getElementById('iframeval').textContent=e.data.ifbottom+(same?'  ⚠ non-zero inside iframe = double-count risk':'  ✓ zero');
+      document.getElementById('iframeval').className='v '+(same?'bad':'good');
+      updateRaw();
+    }
+  });
+
+  // viewport / chrome
+  var vv=window.visualViewport||{};
+  R.viewport={innerH:innerHeight,clientH:document.documentElement.clientHeight,
+    vvH:vv.height,vvOffsetTop:vv.offsetTop,vvPageTop:vv.pageTop,vvScale:vv.scale,
+    screenH:screen.height,dpr:devicePixelRatio};
+  kv('sec-vp','window.innerHeight',innerHeight);
+  kv('sec-vp','documentElement.clientHeight',document.documentElement.clientHeight);
+  kv('sec-vp','visualViewport.height',vv.height);
+  var chrome=(innerHeight && vv.height)?(innerHeight-vv.height):null;
+  kv('sec-vp','browser-chrome overlap (inner−vv)',chrome==null?'—':chrome+'px', chrome>0?'warn':'good');
+  kv('sec-vp','screen.height',screen.height);
+  kv('sec-vp','devicePixelRatio',devicePixelRatio);
+
+  // fixed bar vs safe area
+  var bar=document.getElementById('testbar');
+  var rect=bar.getBoundingClientRect();
+  var insetB=parseFloat(ins.bottom)||0;
+  var underIndicator=insetB>0;
+  R.bar={rectBottom:rect.bottom,rectTop:rect.top,insetBottom:insetB};
+  kv('sec-bar','bar height','50px (like #tabbar)');
+  kv('sec-bar','safe-area-inset-bottom',ins.bottom);
+  kv('sec-bar','bar lower '+insetB+'px in home-indicator zone?', underIndicator?'YES — add padding-bottom:env(safe-area-inset-bottom) to #tabbar':'no', underIndicator?'bad':'good');
+
+  kv('sec-env2','browser',R.browser,'good');
+  kv('sec-env2','installed / standalone', installed?'YES':'no (browser tab)', installed?'good':'warn');
+  kv('sec-env2','navigator.standalone', std);
+  kv('sec-env2','UA', ua);
+
+  function updateRaw(){document.getElementById('raw').textContent=JSON.stringify(R,null,2);}
+  updateRaw();
+  window.copyReport=function(){var t=document.getElementById('raw').textContent;
+    function toast(){var x=document.getElementById('toast');x.classList.add('show');setTimeout(function(){x.classList.remove('show');},1400);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(toast,fb);}else fb();
+    function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast();}catch(e){alert('copy manually');}a.remove();}};
+  setTimeout(updateRaw,1200);
+})();
+</script>
+</body>
+</html>
