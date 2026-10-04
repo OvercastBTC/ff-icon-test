@@ -84,6 +84,28 @@
         <small>Path resolution (compare to A)</small></span></a>
     </div>
 
+    <div class="how" style="margin-top:26px"><h2>Round 2 — rel= / base64 / combo variants</h2>
+      <p style="margin:0;color:var(--mut);font-size:14px">Chasing a self-contained,
+      full-bleed icon that works in the most browsers. I is full-bleed via rel=icon;
+      J/K test inline base64 (for BATTERY's single-file build); M is the max-compat combo.</p></div>
+    <div class="grid">
+      <a class="card" href="i/index.html"><span class="chip" style="background:#303f9f">I</span>
+        <span class="meta"><b>I — rel="icon" ONLY (file)</b>
+        <small>No apple-touch-icon; full-bleed in share sheet</small></span></a>
+      <a class="card" href="j/index.html"><span class="chip" style="background:#f57c00">J</span>
+        <span class="meta"><b>J — rel="icon" as BASE64 data URI</b>
+        <small>Inlined, no icon file (single-file build)</small></span></a>
+      <a class="card" href="k/index.html"><span class="chip" style="background:#c62828">K</span>
+        <span class="meta"><b>K — apple-touch-icon as BASE64</b>
+        <small>Does a data: URI work for apple-touch-icon?</small></span></a>
+      <a class="card" href="m/index.html"><span class="chip" style="background:#00897b">M</span>
+        <span class="meta"><b>M — MAX-COMPAT combo</b>
+        <small>apple-touch-icon(sizes)+rel=icon+manifest</small></span></a>
+      <a class="card" href="z/index.html"><span class="chip" style="background:#111">Z</span>
+        <span class="meta"><b>Z — name discriminator ("Zebra")</b>
+        <small>Proves FF-iOS monogram = name's first letter</small></span></a>
+    </div>
+
     <footer>
       ff-icon-test · built by Lane F (F.26.10.03.1) for REQ-024 · each page carries exactly
       one icon strategy so a PASS/FAIL is unambiguous.
